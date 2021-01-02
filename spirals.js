@@ -1,5 +1,5 @@
-function createArchimedeanSpiralWithBezierCurve(x, y, radius, loops, startingAngle, pathsToDisplay) {
-  displaySVGPaths(x, y, radius, loops, startingAngle, pathsToDisplay);
+function createArchimedeanSpiralWithBezierCurve(x, y, radius, loops, startingAngle, svgStyle={}, pathsToDisplay) {
+  displaySVGPaths(x, y, radius, loops, startingAngle, svgStyle, pathsToDisplay);
 }
 
 function get1QDegrees(degrees) {
@@ -22,10 +22,15 @@ function sin(degrees) {
   return Math.sin(get1QDegrees(degrees)) * (1 - 2 * (Math.floor( degrees / 180 ) % 2));
 }
 
-function createSVGNode(width, height) {
+function createSVGNode(radius, svgStyle) {
   const svgNode = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-  svgNode.setAttribute("width", width);
-  svgNode.setAttribute("height", height);
+
+  svgNode.setAttribute("width", radius * 2);
+  svgNode.setAttribute("height", radius * 2);
+
+  for (let p in svgStyle) {
+    svgNode.setAttribute(p, svgStyle[p]);
+  }
 
   return svgNode;
 }
@@ -121,18 +126,31 @@ function createSVGArchimedeanSpiralLinesPath(x, y, archimedeanPoints, style) {
   return pointsNode;
 }
 
+function toFixed(number, decimals) {
+  if(isNaN(number)) {
+    throw Error("number param is not a number.");
+  }
+
+  if(isNaN(decimals)) {
+    throw Error("decimals param is not a number.");
+  }
+
+  const fixedNumber = number.toFixed(2);
+  return fixedNumber - parseInt(fixedNumber) > 0 ? fixedNumber : parseInt(fixedNumber);
+}
+
 function createSVGArchimedeanQuadraticBezierCurvesPath(x, y, archimedeanPoints, startingAngle, iterationIncrement, style) {
   const pointsNode = document.createElementNS('http://www.w3.org/2000/svg', 'path');
   const bezierControlPoint = calculateBezierControlPoint(x, y, startingAngle, iterationIncrement);
   
   let pathString = " M" + x + "," + y;
   pathString += " Q";
-  pathString += " " + bezierControlPoint.xb.toFixed(2) + "," + bezierControlPoint.yb.toFixed(2);
-  pathString += " " + archimedeanPoints[0].x.toFixed(2) + "," + archimedeanPoints[0].y.toFixed(2);
+  pathString += " " + toFixed(bezierControlPoint.xb, 2) + "," + toFixed(bezierControlPoint.yb, 2);
+  pathString += " " + toFixed(archimedeanPoints[0].x, 2) + "," + toFixed(archimedeanPoints[0].y, 2);
 
   for(let i = 1; i < archimedeanPoints.length; i ++) {
     pathString += " T";
-    pathString += " " + archimedeanPoints[i].x.toFixed(2) + "," + archimedeanPoints[i].y.toFixed(2);
+    pathString += " " + toFixed(archimedeanPoints[i].x, 2) + "," + toFixed(archimedeanPoints[i].y, 2);
   }
 
   pointsNode.setAttributeNS(null, 'd', pathString);
@@ -146,8 +164,8 @@ function createSVGArchimedeanQuadraticBezierCurvesPath(x, y, archimedeanPoints, 
   return pointsNode;
 }
 
-function displaySVGPaths(x, y, radius, loops, startingAngle, pathsToDisplay={}) {
-  const svgNode = createSVGNode(radius * 2, radius * 2);
+function displaySVGPaths(x, y, radius, loops, startingAngle, svgStyle={}, pathsToDisplay={}) {
+  const svgNode = createSVGNode(radius, svgStyle);
   document.body.appendChild(svgNode);
 
   pathsToDisplay.axes && svgNode.appendChild(createSVGXYAxesPath(x, y, radius, pathsToDisplay.axes));
