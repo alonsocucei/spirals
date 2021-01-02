@@ -33,7 +33,13 @@ Easy to use:
         }
       };
 
-      createArchimedeanSpiralWithBezierCurve(250, 250, 250, 3, 180, paths);
+      const svgStyle = {
+        width: 500,
+        height: 500,       
+        viewBox: "0,0 500,500"
+      };
+      
+      createArchimedeanSpiralWithBezierCurve(250, 250, 250, 3, 180, svgStyle, paths);
     </script>  
   </body>
 </html>
